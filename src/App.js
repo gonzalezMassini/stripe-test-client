@@ -7,6 +7,7 @@ import CheckoutForm from './CheckoutForm.js'
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getProduct, getPrices, getProducts } from "./api";
 
 
 
@@ -18,29 +19,38 @@ const stripePromise = loadStripe('pk_test_51KAo2HDhrjzxPiXMeZepdOserC9kTHfqaLmSt
 function App() {
   const [clientSecret, setClientSecret] = useState("");
   const { isAuthenticated, isLoading } = useAuth0();
+  // const [products, setProducts] = useState()
+  const [prices, setPrices] = useState([])
+
+  const getSingleProduct=async(id)=>{
+    const response = await getProduct(id)
+    console.log(response)
+    const product = response.data
+    return product
+  }
+
+  const getAllPrices=async()=>{
+    const response = await getPrices()
+    const products = await getProducts()
+    const prices = response.data
+    const prods = products.data
+
+    let newPrices = prices.map(price=>{
+      let prod  = prods.filter((prod)=>price.product === prod.id)[0]
+      price = {...price, productInfo: prod}
+      return price
+    })
+    setPrices(newPrices)
+  }
+
+  useEffect(()=>{
+    getAllPrices()
+  },[])
 
   if (isLoading) {
     return <div>Loading ...</div>;
   }
 
-
-
-  // useEffect(() => {
-    // Create PaymentIntent as soon as the page loads
-    // const url = "localhost:4242"
-    // try {
-    //   fetch(url +  "/create-payment-intent", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json",'Access-Control-Allow-Origin':'*' },
-    //     body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
-    //     mode: 'cors',
-    //   })
-    //   .then((res) => res.json())
-    //   .then((data) => setClientSecret(data.clientSecret));
-    // } catch (error) {
-    //   console.log(error)
-    // }
-  // }, []);
 
   const appearance = {
     theme: 'stripe',
@@ -51,8 +61,9 @@ function App() {
     appearance,
   };
 
+
   const handleCheckout=()=>{
-    fetch("https://stripe-testing-server.herokuapp.com/create-checkout-session", {
+    fetch(process.env.STRIPE_SERVER +"/create-checkout-session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",'Access-Control-Allow-Origin':'*',
@@ -86,6 +97,21 @@ function App() {
             <CheckoutForm />
           </Elements>
         ))
+      }
+
+      {
+        isAuthenticated && (
+          prices.map((price)=>{
+            console.log(price)
+            return(
+              <div>
+                {price.active ? (<><p>{price.productInfo.name}</p>
+                <img width={75} height={75} src={price.productInfo.images[0]}/>
+                <p>{(price.unit_amount)/100}</p></>):null}
+              </div>
+            )
+          })
+        )
       }
     </div>
   );
