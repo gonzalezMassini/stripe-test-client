@@ -55,7 +55,7 @@ function App() {
     fetch("https://stripe-testing-server.herokuapp.com/create-checkout-session", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json",'Access-Control-Allow-Origin':'https://stripe-test-client.herokuapp.com/',
     },
     body: JSON.stringify({
       items: [
