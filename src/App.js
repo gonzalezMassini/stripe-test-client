@@ -7,7 +7,7 @@ import CheckoutForm from './CheckoutForm.js'
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getProduct, getPrices, getProducts } from "./api";
+import { getPrices, getProducts } from "./api";
 
 
 
@@ -21,13 +21,6 @@ function App() {
   const { isAuthenticated, isLoading } = useAuth0();
   // const [products, setProducts] = useState()
   const [prices, setPrices] = useState([])
-
-  const getSingleProduct=async(id)=>{
-    const response = await getProduct(id)
-    console.log(response)
-    const product = response.data
-    return product
-  }
 
   const getAllPrices=async()=>{
     const response = await getPrices()
@@ -63,7 +56,7 @@ function App() {
 
 
   const handleCheckout=()=>{
-    fetch(process.env.STRIPE_SERVER +"/create-checkout-session", {
+    fetch(process.env.REACT_APP_STRIPE_SERVER+"/create-checkout-session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",'Access-Control-Allow-Origin':'*',
@@ -102,11 +95,10 @@ function App() {
       {
         isAuthenticated && (
           prices.map((price)=>{
-            console.log(price)
             return(
-              <div>
+              <div key={price.id}>
                 {price.active ? (<><p>{price.productInfo.name}</p>
-                <img width={75} height={75} src={price.productInfo.images[0]}/>
+                <img width={75} height={75} src={price.productInfo.images[0]} alt="product"/>
                 <p>{(price.unit_amount)/100}</p></>):null}
               </div>
             )
