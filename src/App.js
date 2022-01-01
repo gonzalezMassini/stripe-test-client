@@ -52,7 +52,7 @@ function App() {
   };
 
   const handleCheckout=()=>{
-    fetch("https://stripe-test-client.herokuapp.com/create-checkout-session", {
+    fetch("https://stripe-testing-server.herokuapp.com/create-checkout-session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -71,7 +71,7 @@ function App() {
       window.location = url
     })
     .catch(e => {
-      console.error(e.error)
+      console.error(e)
     })
   }
 
